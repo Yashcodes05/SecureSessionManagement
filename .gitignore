@@ -1,0 +1,30 @@
+# Build directories
+**/build/
+**/out/
+**/cmake-build-*/
+**/x64/
+**/Debug/
+**/Release/
+
+# Visual Studio & IDE files
+.vs/
+*.suo
+*.user
+*.sln
+*.vcxproj
+*.vcxproj.filters
+*.vcxproj.user
+
+# Binaries & compiled files
+*.exe
+*.obj
+*.o
+*.a
+*.pdb
+*.ilk
+*.lib
+*.dll
+
+# Runtime logs
+**/security_log.txt
+*.log

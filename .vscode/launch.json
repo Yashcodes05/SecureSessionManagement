@@ -1,0 +1,41 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "▶ Run Secure Session App (Interactive)",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/SecureSessionManagement/build/SecureSessionApp.exe",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}/SecureSessionManagement",
+            "environment": [
+                {
+                    "name": "PATH",
+                    "value": "E:\\mingw64\\bin;${env:PATH}"
+                }
+            ],
+            "externalConsole": true,
+            "MIMode": "gdb",
+            "miDebuggerPath": "E:/mingw64/bin/gdb.exe"
+        },
+        {
+            "name": "▶ Run 30 Security Tests",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/SecureSessionManagement/build/SecurityTests.exe",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}/SecureSessionManagement",
+            "environment": [
+                {
+                    "name": "PATH",
+                    "value": "E:\\mingw64\\bin;${env:PATH}"
+                }
+            ],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "miDebuggerPath": "E:/mingw64/bin/gdb.exe"
+        }
+    ]
+}

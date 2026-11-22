@@ -1,0 +1,36 @@
+name: Secure Session Management CI
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+jobs:
+  build-and-test:
+    name: Windows MSVC Build & Security Tests
+    runs-on: windows-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Configure CMake (MSVC)
+        run: cmake -S SecureSessionManagement -B SecureSessionManagement/build -A x64
+
+      - name: Build All Targets (Release)
+        run: cmake --build SecureSessionManagement/build --config Release
+
+      - name: Run 30 Automated Security Tests
+        run: |
+          cd SecureSessionManagement
+          .\build\Release\SecurityTests.exe
+
+      - name: Upload Executable Binaries (Artifacts)
+        uses: actions/upload-artifact@v4
+        with:
+          name: secure-session-executables
+          path: |
+            SecureSessionManagement/build/Release/SecureSessionApp.exe
+            SecureSessionManagement/build/Release/SecurityTests.exe

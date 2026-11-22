@@ -1,0 +1,62 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "▶ Run Interactive App (SecureSessionApp)",
+            "type": "shell",
+            "command": "${workspaceFolder}/SecureSessionManagement/build/SecureSessionApp.exe",
+            "options": {
+                "cwd": "${workspaceFolder}/SecureSessionManagement",
+                "env": {
+                    "PATH": "E:\\mingw64\\bin;${env:PATH}"
+                }
+            },
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": true,
+                "panel": "new"
+            },
+            "group": "none",
+            "problemMatcher": []
+        },
+        {
+            "label": "▶ Run 30 Security Tests (SecurityTests)",
+            "type": "shell",
+            "command": "${workspaceFolder}/SecureSessionManagement/build/SecurityTests.exe",
+            "options": {
+                "cwd": "${workspaceFolder}/SecureSessionManagement",
+                "env": {
+                    "PATH": "E:\\mingw64\\bin;${env:PATH}"
+                }
+            },
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": true,
+                "panel": "shared"
+            },
+            "group": {
+                "kind": "test",
+                "isDefault": true
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "🔨 Rebuild Project (MinGW Makefiles)",
+            "type": "shell",
+            "command": "cmake --build build",
+            "options": {
+                "cwd": "${workspaceFolder}/SecureSessionManagement",
+                "env": {
+                    "PATH": "E:\\mingw64\\bin;${env:PATH}"
+                }
+            },
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "problemMatcher": []
+        }
+    ]
+}

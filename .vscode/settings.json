@@ -1,0 +1,4 @@
+{
+    "cmake.sourceDirectory": "${workspaceFolder}/SecureSessionManagement",
+    "cmake.buildDirectory": "${workspaceFolder}/SecureSessionManagement/build"
+}
