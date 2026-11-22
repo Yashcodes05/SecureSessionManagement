@@ -11,15 +11,21 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-# ── MSVC-specific flags ─────────────────────────────────────────────────────
+# ── Compiler-specific security hardening flags ─────────────────────────────
 if(MSVC)
     # /W4   = high warning level
-    # /WX   = treat warnings as errors (optional, remove if too strict)
-    # /sdl  = additional security checks
-    # /GS   = buffer security check
-    # /guard:cf = control-flow guard
+    # /sdl  = additional security checks (SDL)
+    # /GS   = buffer security check (stack canaries)
+    # /guard:cf = control-flow guard (CFG)
     add_compile_options(/W4 /sdl /GS /guard:cf)
     add_compile_definitions(_CRT_SECURE_NO_WARNINGS UNICODE _UNICODE)
+else()
+    # GCC / Clang equivalents:
+    # -Wall -Wextra: High warning diagnostics
+    # -fstack-protector-strong: Stack canary protection (equivalent to /GS)
+    # -D_FORTIFY_SOURCE=2: Buffer overflow detection for libc functions
+    add_compile_options(-Wall -Wextra -fstack-protector-strong)
+    add_compile_definitions(_FORTIFY_SOURCE=2)
 endif()
 
 # ── Include path ─────────────────────────────────────────────────────────────
