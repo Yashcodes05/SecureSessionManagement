@@ -1279,27 +1279,35 @@
                 case 'replay':
                     const replayBox = document.getElementById('attack-res-replay');
                     if (!lastRevokedToken) {
-                        replayBox.innerHTML = "<span style='color:var(--accent-amber);'>⚠️ Please login and logout once first to generate a revoked token!</span>";
-                        return;
+                        // Auto-simulate a login + logout cycle so the attack works seamlessly on 1 click
+                        lastRevokedToken = generateToken();
+                        appendAudit("INFO", "LOGIN_SUCCESS", "alice", `Auto-issued token ${lastRevokedToken.substring(0,8)}... for attack simulation.`);
+                        appendAudit("INFO", "LOGOUT", "alice", `Session with token ${lastRevokedToken.substring(0,8)}... terminated by user.`);
                     }
                     replayBox.innerHTML = `
-                        <div style="color:var(--accent-green); margin-top:6px;">
+                        <div style="color:var(--accent-green); margin-top:6px; background:rgba(16,185,129,0.08); padding:10px; border-radius:6px; border:1px solid rgba(16,185,129,0.2);">
                             🛡️ <strong>ATTACK BLOCKED (HTTP 401 Unauthorized)</strong><br>
-                            Replayed Token: <code>${lastRevokedToken.substring(0, 16)}...</code><br>
-                            Defense: Revocation status tracked in memory; cryptographic reuse rejected.
+                            <strong>Eavesdropped Token:</strong> <code>${lastRevokedToken.substring(0, 16)}...${lastRevokedToken.substring(56)}</code><br>
+                            <strong>Adversary Action:</strong> Transmitted validly formatted bearer token in <code>Authorization: Bearer</code> header after user session logout.<br>
+                            <strong>Security Defense:</strong> <code>SessionManager::validateToken()</code> queries revoked session store. Status confirmed as <code>REVOKED</code>.<br>
+                            <strong>Result:</strong> Access denied immediately. Token replay prevented.
                         </div>
                     `;
-                    appendAudit("SECURITY", "REVOKED_TOKEN_REUSE", "attacker", `Detected replay of revoked token ${lastRevokedToken.substring(0,8)}...`);
+                    appendAudit("SECURITY", "REVOKED_TOKEN_REUSE", "attacker", `Detected replay of revoked token ${lastRevokedToken.substring(0,8)}... Request blocked.`);
                     break;
 
                 case 'brute_force':
                     const bruteBox = document.getElementById('attack-res-brute');
                     bruteBox.innerHTML = `
-                        <div style="color:var(--accent-green); margin-top:6px;">
-                            🛡️ <strong>DEFENSE ACTIVATED:</strong><br>
-                            Simulated 5 rapid dictionary attempts on 'alice':<br>
-                            [Attempt 1: Fail] [Attempt 2: Fail] [Attempt 3: Fail] [Attempt 4: Fail] [Attempt 5: Lockout!]<br>
-                            Result: Account 'alice' status set to <code>LOCKED</code>. Further attempts rejected.
+                        <div style="color:var(--accent-green); margin-top:6px; background:rgba(16,185,129,0.08); padding:10px; border-radius:6px; border:1px solid rgba(16,185,129,0.2);">
+                            🛡️ <strong>DEFENSE ACTIVATED — ACCOUNT LOCKED OUT:</strong><br>
+                            Simulating 5 rapid dictionary attempts on user <code>'alice'</code>:<br>
+                            &bull; Attempt 1: <code>123456</code> &rarr; [FAIL: Invalid credentials]<br>
+                            &bull; Attempt 2: <code>password</code> &rarr; [FAIL: Invalid credentials]<br>
+                            &bull; Attempt 3: <code>admin123</code> &rarr; [FAIL: Invalid credentials]<br>
+                            &bull; Attempt 4: <code>qwerty</code> &rarr; [FAIL: Invalid credentials]<br>
+                            &bull; Attempt 5: <code>letmein</code> &rarr; [FAIL: Threshold reached (5/5) &rarr; <strong>LOCKED!</strong>]<br>
+                            <strong>Defense:</strong> <code>AuthenticationManager</code> increments failure counter. Account status locked; even correct passwords will now be rejected.
                         </div>
                     `;
                     if (registeredUsers["alice"]) registeredUsers["alice"].locked = true;
@@ -1308,14 +1316,17 @@
 
                 case 'fixation':
                     const fixBox = document.getElementById('attack-res-fixation');
-                    const preSession = "attacker-controlled-session-id-001";
+                    const preSession = "attacker-pre-session-uuid-987654";
                     const newSession = generateUUID();
+                    const newTok = generateToken();
                     fixBox.innerHTML = `
-                        <div style="color:var(--accent-green); margin-top:6px;">
-                            🛡️ <strong>FIXATION MITIGATED:</strong><br>
-                            Injected ID: <code>${preSession}</code><br>
-                            Regenerated ID: <code>${newSession}</code><br>
-                            Defense: Authentication engine invalidates incoming session ID and forces fresh CSPRNG generation.
+                        <div style="color:var(--accent-green); margin-top:6px; background:rgba(16,185,129,0.08); padding:10px; border-radius:6px; border:1px solid rgba(16,185,129,0.2);">
+                            🛡️ <strong>SESSION FIXATION DEFEATED:</strong><br>
+                            <strong>Attacker-Supplied Session ID:</strong> <code>${preSession}</code><br>
+                            <strong>System Action:</strong> Incoming unauthenticated session ID destroyed upon authentication boundary.<br>
+                            <strong>Fresh Session Allocated:</strong> <code>${newSession}</code><br>
+                            <strong>Fresh Token Generated:</strong> <code>${newTok.substring(0, 16)}...</code> (256-bit CSPRNG)<br>
+                            <strong>Defense:</strong> Pre-authentication sessions never carry over post-login. Attacker cannot hijack the session.
                         </div>
                     `;
                     appendAudit("INFO", "SESSION_CREATED", "user", "Session fixation mitigated: regenerated fresh session ID upon login.");
@@ -1324,11 +1335,12 @@
                 case 'priv_esc':
                     const privBox = document.getElementById('attack-res-priv');
                     privBox.innerHTML = `
-                        <div style="color:var(--accent-green); margin-top:6px;">
+                        <div style="color:var(--accent-green); margin-top:6px; background:rgba(16,185,129,0.08); padding:10px; border-radius:6px; border:1px solid rgba(16,185,129,0.2);">
                             🛡️ <strong>ESCALATION BLOCKED (HTTP 403 Forbidden):</strong><br>
-                            Request: <code>POST /api/admin/system-wipe</code><br>
-                            Token Subject Role: <code>USER</code> | Required: <code>ADMIN</code><br>
-                            Defense: Cryptographically asserted roles in backend session registry.
+                            <strong>Target Protected Endpoint:</strong> <code>POST /api/admin/system-wipe</code><br>
+                            <strong>Subject Token Identity:</strong> User <code>'alice'</code> (Assigned Role: <code>USER</code>)<br>
+                            <strong>Required Permission:</strong> Role <code>ADMIN</code><br>
+                            <strong>Defense:</strong> Cryptographic role assertion verified via <code>Session::getRole()</code>. Unauthorized action rejected and logged to audit system.
                         </div>
                     `;
                     appendAudit("SECURITY", "UNAUTHORIZED_ACCESS", "alice", "Privilege escalation blocked on administrative endpoint.");
@@ -1339,11 +1351,12 @@
                     const validTok = generateToken();
                     const tamperedTok = validTok.substring(0, validTok.length - 1) + (validTok.endsWith('a') ? 'b' : 'a');
                     tamperBox.innerHTML = `
-                        <div style="color:var(--accent-green); margin-top:6px;">
-                            🛡️ <strong>TAMPERING DETECTED:</strong><br>
-                            Valid Token: <code>${validTok.substring(0, 16)}...</code><br>
-                            Tampered:    <code>${tamperedTok.substring(0, 16)}...</code> (1-bit flipped)<br>
-                            Defense: <code>ssm::CryptoUtils::constantTimeCompare</code> failed. Attack rejected in constant execution time (timing-attack resistant).
+                        <div style="color:var(--accent-green); margin-top:6px; background:rgba(16,185,129,0.08); padding:10px; border-radius:6px; border:1px solid rgba(16,185,129,0.2);">
+                            🛡️ <strong>TAMPERING DETECTED &amp; TIMING ATTACK MITIGATED:</strong><br>
+                            <strong>Original Valid Token:</strong> <code>${validTok.substring(0, 16)}...${validTok.substring(56)}</code><br>
+                            <strong>Tampered Byte:</strong> <code>${tamperedTok.substring(0, 16)}...${tamperedTok.substring(56)}</code> (1 bit flipped)<br>
+                            <strong>Defense:</strong> <code>CryptoUtils::constantTimeCompare()</code> performs constant-time byte comparisons across full 32 bytes without early exit.<br>
+                            <strong>Result:</strong> Token rejected without leaking byte match positions via timing variations.
                         </div>
                     `;
                     appendAudit("SECURITY", "INVALID_TOKEN", "attacker", "Tampered token rejected via constant-time verification.");
