@@ -15,7 +15,7 @@
 
 ---
 
-## 🌐 Live Interactive Demonstration
+## 🌐  Live Interactive Demonstration
 
 * **Live Web Dashboard (GitHub Pages):** [https://yashcodes05.github.io/SecureSessionManagement/](https://yashcodes05.github.io/SecureSessionManagement/)
 * **Offline Local Web Demo:** Double-click `open_web_demo.bat` or open `docs/index.html` in any modern browser.
